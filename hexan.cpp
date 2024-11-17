@@ -4,24 +4,65 @@
 #include <iostream>
 #include <vector>
 
-void hexan(const std::vector<unsigned char> &data) {
-  const int bytesPerLine = 24;
-  const int addressWidth = 8;
+#define BYTES_PER_LINE 24
+#define ADDRESS_WIDTH 8
 
-  for (size_t i = 0; i < data.size(); i += bytesPerLine) {
+void hexan(std::ifstream &file) {
+  std::vector<char> buffer(BYTES_PER_LINE);
+  size_t address = 0;
+
+  while (file.read(buffer.data(), buffer.size())) {
+    // ADDRES
+    std::cout << std::setw(ADDRESS_WIDTH) << std::setfill('0') << std::uppercase
+              << std::hex << address << "    ";
+
+    // HEX
+    for (size_t j = 0; j < BYTES_PER_LINE; ++j) {
+      std::cout << std::setw(2) << std::setfill('0') << std::hex
+                << static_cast<int>(static_cast<unsigned char>(buffer[j]))
+                << " ";
+      if ((j + 1) % 4 == 0) {
+        std::cout << " ";
+      }
+    }
+
+    std::cout << " ";
+
+    // ASCII
+    for (size_t j = 0; j < BYTES_PER_LINE; ++j) {
+      unsigned char ch = buffer[j];
+      if (ch >= 32 && ch <= 126) {
+        std::cout << ch;
+      } else {
+        std::cout << ".";
+      }
+    }
+
+    std::cout << std::endl;
+    address += BYTES_PER_LINE;
+  }
+
+  // Если остались байты, которые не составляют полные 24 байта, выводим их
+  // Если при последнем прочтении файла, кол-во оставшиъ байтов было больше
+  // нуля, то оставшиеся байты проходятся по немного другому алгоритму
+  if (file.gcount() > 0) {
     // Print address
-    std::cout << std::setw(addressWidth) << std::setfill('0') << std::uppercase
-              << std::hex << i << "    ";
+    std::cout << std::setw(ADDRESS_WIDTH) << std::setfill('0') << std::uppercase
+              << std::hex << address << "    ";
 
     // Print hex values
-    for (size_t j = 0; j < bytesPerLine; ++j) {
-      if (i + j < data.size()) {
-        std::cout << std::setw(2) << std::setfill('0') << std::hex
-                  << static_cast<int>(data[i + j]) << " ";
-      } else {
-        std::cout << "   ";
+    for (size_t j = 0; j < file.gcount(); ++j) {
+      std::cout << std::setw(2) << std::setfill('0') << std::hex
+                << static_cast<int>(static_cast<unsigned char>(buffer[j]))
+                << " ";
+      if ((j + 1) % 4 == 0) {
+        std::cout << " ";
       }
-      if (j % 4 == 3) {
+    }
+
+    for (size_t j = file.gcount(); j < BYTES_PER_LINE; ++j) {
+      std::cout << "   ";
+      if ((j + 1) % 4 == 0) {
         std::cout << " ";
       }
     }
@@ -29,16 +70,12 @@ void hexan(const std::vector<unsigned char> &data) {
     std::cout << " ";
 
     // Print ASCII values
-    for (size_t j = 0; j < bytesPerLine; ++j) {
-      if (i + j < data.size()) {
-        unsigned char ch = data[i + j];
-        if (ch >= 32 && ch <= 126) {
-          std::cout << ch;
-        } else {
-          std::cout << ".";
-        }
+    for (size_t j = 0; j < file.gcount(); ++j) {
+      unsigned char ch = buffer[j];
+      if (ch >= 32 && ch <= 126) {
+        std::cout << ch;
       } else {
-        std::cout << " ";
+        std::cout << ".";
       }
     }
 
@@ -54,15 +91,11 @@ int main(int argc, char *argv[]) {
 
   std::ifstream file(argv[1], std::ios::binary);
   if (!file) {
-    std::cerr << "hexan : Error opening file: " << argv[1] << std::endl;
+    std::cerr << "hexan: Error opening file: " << argv[1] << std::endl;
     return 1;
   }
 
-  std::vector<unsigned char> data((std::istreambuf_iterator<char>(file)),
-                                  std::istreambuf_iterator<char>());
-  file.close();
-
-  hexan(data);
+  hexan(file);
 
   return 0;
 }
