@@ -24,9 +24,9 @@ echo "Configuring and building the project..."
 cmake ..
 make
 
-# Копирование собранного бинарника в /usr/local/bin/
+# Копирование собранного бинарника в /usr/bin/
 echo "Installing hexan..."
-sudo install -m 755 $SCRIPT_DIR/../bin/hexan /usr/local/bin/
+sudo install -m 755 $SCRIPT_DIR/../bin/hexan /usr/bin/
 
 # Проверка успешной установки
 if command -v hexan &> /dev/null; then
