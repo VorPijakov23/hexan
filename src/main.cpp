@@ -4,10 +4,9 @@
 #include <fstream>
 #include <iostream>
 
-const size_t default_bytes_per_line = 16; // 16
+const size_t default_bytes_per_line = 16;
 const size_t address_width = 8;
-const size_t max_bytes_per_line =
-    1024; // Максимальное разумное значение для bytes_per_line
+const size_t max_bytes_per_line = 1024;
 
 int main(int argc, char *argv[]) {
   if (argc == 1) {
@@ -39,7 +38,9 @@ int main(int argc, char *argv[]) {
           return 1;
         }
         bytes_per_line = static_cast<size_t>(value);
-      } else {
+      }
+
+      else {
         std::cerr << "hexan: --bytes option requires a value" << std::endl;
         return 1;
       }
